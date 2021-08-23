@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/thisismyaim/utils/models"
@@ -41,7 +40,12 @@ func ValidateAuth() gin.HandlerFunc {
 		}
 
 		if token.Valid {
-			fmt.Println(token.Claims)
+			_, err := c.Cookie("rent_auth")
+
+			if err != nil {
+				c.SetCookie("rent_auth", "test", 3600, "/", "api.thisismyaim.com", true, false)
+			}
+			
 			c.Next()
 		}
 	}
