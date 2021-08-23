@@ -1,16 +1,16 @@
 package utils
 
 import (
-"github.com/rifflock/lfshook"
-"github.com/sirupsen/logrus"
-"os"
-"time"
+	"github.com/rifflock/lfshook"
+	"github.com/sirupsen/logrus"
+	"os"
+	"time"
 )
 
 // Log Export global
 var Log *logrus.Logger
 
-func NewLogger() *logrus.Logger {
+func Logger() *logrus.Logger {
 	if Log != nil {
 		return Log
 	}
@@ -30,4 +30,3 @@ func NewLogger() *logrus.Logger {
 
 	return Log
 }
-
