@@ -45,7 +45,7 @@ func ValidateAuth() gin.HandlerFunc {
 			if err != nil {
 				c.SetCookie("rent_auth", "test", 3600, "/", "api.thisismyaim.com", true, false)
 			}
-			
+
 			c.Next()
 		}
 	}
