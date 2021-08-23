@@ -1,9 +1,10 @@
-package utils
+package database
 
 import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql" // nolint
+	"github.com/thisismyaim/utils"
 	"os"
 	"time"
 )
@@ -23,7 +24,7 @@ func Connect() (*sql.DB, error) {
 	db, err := sql.Open("mysql", dbString)
 
 	if err != nil {
-		Logger().Errorln(err)
+		utils.Logger().Errorln(err)
 		return nil, err
 	}
 
@@ -34,7 +35,7 @@ func Connect() (*sql.DB, error) {
 	err = db.Ping()
 
 	if err != nil {
-		Logger().Errorln(err)
+		utils.Logger().Errorln(err)
 	}
 
 	DB = db
