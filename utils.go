@@ -31,7 +31,7 @@ func ValidateAuth() gin.HandlerFunc {
 			fmt.Println(err)
 		}
 
-		c.Set("user", user)
+		c.Set("user", user.User)
 		c.Next()
 	}
 }
