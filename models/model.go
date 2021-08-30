@@ -17,6 +17,6 @@ type User struct {
 }
 
 type UserClaims struct {
-	*User
+	User User
 	*jwt.StandardClaims
 }

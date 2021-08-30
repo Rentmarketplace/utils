@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/thisismyaim/utils/models"
@@ -24,24 +25,33 @@ func ValidateAuth() gin.HandlerFunc {
 			return
 		}
 
-		f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
+		user, err := getToken(jwtToken)
 
-		token, err := jwt.ParseWithClaims(jwtToken.Authorization, &models.UserClaims{} , func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.New("unexpected signing method")
-			}
-			return f, nil
-		})
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, models.Error{
-				Message: err.Error(),
-				Code:    401,
-			})
+			fmt.Println(err)
 		}
 
-		if token.Valid {
-			c.Set("token", token.Claims.(models.UserClaims).User)
-			c.Next()
-		}
+		c.Set("user", user)
+		c.Next()
 	}
+}
+
+func getToken(jwToken models.JWT) (*models.UserClaims, error) {
+	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
+
+	token, err := jwt.ParseWithClaims(jwToken.Authorization, &models.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return f, nil
+	})
+	if err != nil {
+		return &models.UserClaims{}, err
+	}
+
+	if token.Valid {
+		return token.Claims.(*models.UserClaims), nil
+	}
+
+	return &models.UserClaims{}, nil
 }
