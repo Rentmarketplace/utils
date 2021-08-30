@@ -14,7 +14,15 @@ import (
 func ValidateAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var jwtToken models.JWT
-		err := c.BindHeader(&jwtToken)
+		cookie, err := c.Cookie("device")
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println("Cookie : ", cookie)
+
+		err = c.BindHeader(&jwtToken)
 
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, models.Error{
