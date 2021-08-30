@@ -17,7 +17,9 @@ func ValidateAuth() gin.HandlerFunc {
 		cookie, err := c.Cookie("device")
 
 		if err != nil {
-			fmt.Println(err)
+			c.AbortWithStatusJSON(404, gin.H{
+				"error": err.Error(),
+			})
 		}
 
 		fmt.Println("Cookie : ", cookie)
