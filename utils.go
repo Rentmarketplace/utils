@@ -40,7 +40,7 @@ func ValidateAuth() gin.HandlerFunc {
 		}
 
 		if token.Valid {
-			c.Set("token", token)
+			c.Set("token", token.Claims.(models.UserClaims).User)
 			c.Next()
 		}
 	}
