@@ -20,9 +20,8 @@ func ValidateAuth() gin.HandlerFunc {
 			c.AbortWithStatusJSON(404, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
-
-		fmt.Println("Cookie : ", cookie)
 
 		err = c.BindHeader(&jwtToken)
 
