@@ -26,7 +26,7 @@ func ValidateAuth() gin.HandlerFunc {
 
 		f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
 
-		token, err := jwt.Parse(jwtToken.Authorization, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(jwtToken.Authorization, &models.UserClaims{} , func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, errors.New("unexpected signing method")
 			}
@@ -40,12 +40,7 @@ func ValidateAuth() gin.HandlerFunc {
 		}
 
 		if token.Valid {
-			_, err := c.Cookie("rent_auth")
-
-			if err != nil {
-				c.SetCookie("rent_auth", "test", 3600, "/", "api.thisismyaim.com", true, false)
-			}
-
+			c.Set("token", token)
 			c.Next()
 		}
 	}
