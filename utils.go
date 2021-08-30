@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/thisismyaim/utils/models"
@@ -30,14 +29,16 @@ func ValidateAuth() gin.HandlerFunc {
 				Message: "missing authorization in header",
 				Code:    400,
 			})
-
 			return
 		}
 
 		user, err := getToken(jwtToken)
 
 		if err != nil {
-			fmt.Println(err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": err.Error(),
+			})
+			return
 		}
 
 		c.Set("user", user.User)
