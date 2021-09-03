@@ -26,14 +26,14 @@ func init()  {
 // CreateOrUpdateToken will issue new bearer token
 func CreateOrUpdateToken(user models.User) (map[string]string, *jwt.Token, error) {
 	var f, err = os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
-	expireAt := time.Now().Add(25 * time.Minute)
-	refreshExpireAt := time.Now().Add(50 * time.Minute)
+	expireAt := time.Now().Add(1 * time.Minute)
+	refreshExpireAt := time.Now().Add(2 * time.Minute)
 
 	if err != nil {
 		return map[string]string{}, nil, err
 	}
 
-	claim := &models.UserClaims{
+	claim := models.UserClaims{
 		User: user,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: expireAt.Unix(),
@@ -46,7 +46,7 @@ func CreateOrUpdateToken(user models.User) (map[string]string, *jwt.Token, error
 		return map[string]string{}, nil, err
 	}
 
-	refreshClaim := &models.UserClaims{
+	refreshClaim := models.UserClaims{
 		User: user,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: refreshExpireAt.Unix(),
