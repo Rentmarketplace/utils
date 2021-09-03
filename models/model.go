@@ -12,8 +12,14 @@ type JWT struct {
 }
 
 type User struct {
-	ID int64 `json:"id"`
+	ID uint64 `json:"id"`
 	Email string `json:"email"`
+	Password string `json:"-" binding:"required"`
+	Firstname string `json:"firstname" binding:"required"`
+	Lastname string `json:"lastname"`
+	Phone string
+	Agree bool `json:"-"`
+	AllowPromo bool `json:"-"`
 }
 
 type UserClaims struct {
