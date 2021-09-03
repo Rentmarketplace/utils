@@ -68,7 +68,7 @@ func RegenerateToken()  {
 
 func checkIfRefreshTokenNotExpired() (*models.JWT, error) {
 	var jwToken models.JWT
-	row := mydb.DB.QueryRow("SELECT refresh_token, device_id from oauth where refresh_token=?", cookie)
+	row := mydb.DB.QueryRow("SELECT refresh_token, device_id from oauth where device_id=?", cookie)
 
 	err := row.Scan(&jwToken.Authorization, &cookie)
 
