@@ -81,7 +81,11 @@ func checkIfRefreshTokenNotExpired() (*models.JWT, error) {
 }
 
 func getToken(jwToken models.JWT) (*models.UserClaims, error) {
-	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
+	if cookie == "" {
+		return nil, errors.New("cookie expired or not exist")
+	}
+
+ 	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
 
 	token, err := verify(jwToken, f)
 	if err != nil {
