@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/thisismyaim/utils/models"
+	"github.com/thisismyaim/utils/dbmodel"
 	"github.com/thisismyaim/utils/mydb"
 	"net/http"
 	"os"
@@ -24,7 +24,7 @@ func init()  {
 }
 
 // CreateOrUpdateToken will issue new bearer token
-func CreateOrUpdateToken(user models.User) (map[string]string, *jwt.Token, error) {
+func CreateOrUpdateToken(user dbmodel.User) (map[string]string, *jwt.Token, error) {
 	var f, err = os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
 	expireAt := time.Now().Add(25 * time.Minute)
 	refreshExpireAt := time.Now().Add(50 * time.Minute)
@@ -33,7 +33,7 @@ func CreateOrUpdateToken(user models.User) (map[string]string, *jwt.Token, error
 		return map[string]string{}, nil, err
 	}
 
-	claim := &models.UserClaims{
+	claim := &dbmodel.UserClaims{
 		User: user,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: expireAt.Unix(),
@@ -46,7 +46,7 @@ func CreateOrUpdateToken(user models.User) (map[string]string, *jwt.Token, error
 		return map[string]string{}, nil, err
 	}
 
-	refreshClaim := &models.UserClaims{
+	refreshClaim := &dbmodel.UserClaims{
 		User: user,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: refreshExpireAt.Unix(),
@@ -68,7 +68,7 @@ func CreateOrUpdateToken(user models.User) (map[string]string, *jwt.Token, error
 // ValidateAuth ValidateToken for auth header request
 func ValidateAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var jwtToken models.JWT
+		var jwtToken dbmodel.JWT
 		deviceCookie, err := c.Cookie("device")
 
 		if err != nil {
@@ -83,7 +83,7 @@ func ValidateAuth() gin.HandlerFunc {
 		err = c.BindHeader(&jwtToken)
 
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, models.Error{
+			c.AbortWithStatusJSON(http.StatusBadRequest, dbmodel.Error{
 				Message: "missing authorization in header",
 				Code:    400,
 			})
@@ -104,8 +104,8 @@ func ValidateAuth() gin.HandlerFunc {
 	}
 }
 
-func checkIfRefreshTokenNotExpired() (*models.JWT, error) {
-	var jwToken models.JWT
+func checkIfRefreshTokenNotExpired() (*dbmodel.JWT, error) {
+	var jwToken dbmodel.JWT
 	row := mydb.DB.QueryRow("SELECT refresh_token, device_id from oauth where device_id=?", cookie)
 
 	err := row.Scan(&jwToken.Authorization, &cookie)
@@ -118,7 +118,7 @@ func checkIfRefreshTokenNotExpired() (*models.JWT, error) {
 	return &jwToken, nil
 }
 
-func getToken(jwToken models.JWT) (*models.UserClaims, error) {
+func getToken(jwToken dbmodel.JWT) (*dbmodel.UserClaims, error) {
 	if cookie == "" {
 		return nil, errors.New("cookie expired or not exist")
 	}
@@ -139,21 +139,21 @@ func getToken(jwToken models.JWT) (*models.UserClaims, error) {
 		}
 
 		if r.Valid {
-			return r.Claims.(*models.UserClaims), nil
+			return r.Claims.(*dbmodel.UserClaims), nil
 		}
 
-		return &models.UserClaims{}, err
+		return &dbmodel.UserClaims{}, err
 	}
 
 	if token.Valid {
-		return token.Claims.(*models.UserClaims), nil
+		return token.Claims.(*dbmodel.UserClaims), nil
 	}
 
-	return &models.UserClaims{}, nil
+	return &dbmodel.UserClaims{}, nil
 }
 
-func verify(jwToken models.JWT, f []byte) (*jwt.Token, error) {
-	token, err := jwt.ParseWithClaims(jwToken.Authorization, &models.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+func verify(jwToken dbmodel.JWT, f []byte) (*jwt.Token, error) {
+	token, err := jwt.ParseWithClaims(jwToken.Authorization, &dbmodel.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
