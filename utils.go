@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/thisismyaim/utils/models"
@@ -9,11 +10,15 @@ import (
 	"os"
 )
 
+var (
+	cookie string
+)
+
 // ValidateAuth ValidateToken for auth header request
 func ValidateAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var jwtToken models.JWT
-		_, err := c.Cookie("device")
+		deviceCookie, err := c.Cookie("device")
 
 		if err != nil {
 			c.AbortWithStatusJSON(404, gin.H{
@@ -21,6 +26,8 @@ func ValidateAuth() gin.HandlerFunc {
 			})
 			return
 		}
+
+		cookie = deviceCookie
 
 		err = c.BindHeader(&jwtToken)
 
@@ -46,6 +53,14 @@ func ValidateAuth() gin.HandlerFunc {
 	}
 }
 
+func RegenerateToken()  {
+	fmt.Println("Test")
+}
+
+func checkIfRefreshTokenNotExpired()  {
+	fmt.Println(cookie)
+}
+
 func getToken(jwToken models.JWT) (*models.UserClaims, error) {
 	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
 
@@ -56,6 +71,7 @@ func getToken(jwToken models.JWT) (*models.UserClaims, error) {
 		return f, nil
 	})
 	if err != nil {
+		checkIfRefreshTokenNotExpired()
 		return &models.UserClaims{}, err
 	}
 
