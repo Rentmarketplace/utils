@@ -35,6 +35,7 @@ func CreateOrUpdateToken(user models.User) (map[string]string, *jwt.Token, error
 
 	claim := models.UserClaims{
 		User: user,
+		Refresh: false,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: expireAt.Unix(),
 		},
@@ -48,6 +49,7 @@ func CreateOrUpdateToken(user models.User) (map[string]string, *jwt.Token, error
 
 	refreshClaim := models.UserClaims{
 		User: user,
+		Refresh: true,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: refreshExpireAt.Unix(),
 		},

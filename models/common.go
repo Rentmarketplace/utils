@@ -23,6 +23,7 @@ type User struct {
 }
 
 type UserClaims struct {
+	Refresh bool
 	User User
 	*jwt.StandardClaims
 }
