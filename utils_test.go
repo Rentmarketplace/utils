@@ -13,7 +13,7 @@ func init()  {
 }
 
 func TestValidateAuth(t *testing.T) {
-	jwToken := dbmodel.JWT{Authorization: os.Getenv("TEST_ACCESS_TOKEN")}
+	jwToken := models.JWT{Authorization: os.Getenv("TEST_ACCESS_TOKEN")}
 
 	u, err := getToken(jwToken)
 
