@@ -2,13 +2,13 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/thisismyaim/utils/models"
 	"github.com/thisismyaim/utils/mydb"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
@@ -21,6 +21,48 @@ func init()  {
 	if err != nil {
 		Logger().Error(err.Error())
 	}
+}
+
+// CreateOrUpdateToken will issue new bearer token
+func CreateOrUpdateToken(user *models.User) (map[string]string, *jwt.Token, error) {
+	var f, err = os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
+	expireAt := time.Now().Add(25 * time.Minute)
+	refreshExpireAt := time.Now().Add(50 * time.Minute)
+
+	if err != nil {
+		return map[string]string{}, nil, err
+	}
+
+	claim := &models.UserClaims{
+		User: *user,
+		StandardClaims: &jwt.StandardClaims{
+			ExpiresAt: expireAt.Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+	signedString, err := token.SignedString(f)
+
+	if err != nil {
+		return map[string]string{}, nil, err
+	}
+
+	refreshClaim := &models.UserClaims{
+		User: *user,
+		StandardClaims: &jwt.StandardClaims{
+			ExpiresAt: refreshExpireAt.Unix(),
+		},
+	}
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaim)
+	refreshSignedString, err := refreshToken.SignedString(f)
+
+	if err != nil {
+		return map[string]string{}, nil, err
+	}
+
+	return map[string]string{
+		"auth_token":   signedString,
+		"refresh_token": refreshSignedString,
+	}, token, nil
 }
 
 // ValidateAuth ValidateToken for auth header request
@@ -60,10 +102,6 @@ func ValidateAuth() gin.HandlerFunc {
 		c.Set("user", user.User)
 		c.Next()
 	}
-}
-
-func RegenerateToken()  {
-	fmt.Println("Test")
 }
 
 func checkIfRefreshTokenNotExpired() (*models.JWT, error) {
