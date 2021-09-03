@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/thisismyaim/utils/models"
+	"github.com/thisismyaim/utils/mydb"
 	"net/http"
 	"os"
 )
@@ -13,6 +14,14 @@ import (
 var (
 	cookie string
 )
+
+func init()  {
+	_, err := mydb.Connect()
+
+	if err != nil {
+		Logger().Error(err.Error())
+	}
+}
 
 // ValidateAuth ValidateToken for auth header request
 func ValidateAuth() gin.HandlerFunc {
@@ -57,21 +66,40 @@ func RegenerateToken()  {
 	fmt.Println("Test")
 }
 
-func checkIfRefreshTokenNotExpired()  {
-	fmt.Println(cookie)
+func checkIfRefreshTokenNotExpired() (*models.JWT, error) {
+	var jwToken models.JWT
+	row := mydb.DB.QueryRow("SELECT refresh_token, device_id from oauth where refresh_token=?", cookie)
+
+	err := row.Scan(&jwToken.Authorization, &cookie)
+
+	if err != nil {
+		Logger().Error(err.Error())
+		return nil, err
+	}
+
+	return &jwToken, nil
 }
 
 func getToken(jwToken models.JWT) (*models.UserClaims, error) {
 	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
 
-	token, err := jwt.ParseWithClaims(jwToken.Authorization, &models.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
-		}
-		return f, nil
-	})
+	token, err := verify(jwToken, f)
 	if err != nil {
-		checkIfRefreshTokenNotExpired()
+		refreshToken, err := checkIfRefreshTokenNotExpired()
+		if err != nil {
+			return nil, err
+		}
+
+		r, refreshTokenErr := verify(*refreshToken, f)
+
+		if refreshTokenErr != nil {
+			return nil, refreshTokenErr
+		}
+
+		if r.Valid {
+			return r.Claims.(*models.UserClaims), nil
+		}
+
 		return &models.UserClaims{}, err
 	}
 
@@ -80,4 +108,14 @@ func getToken(jwToken models.JWT) (*models.UserClaims, error) {
 	}
 
 	return &models.UserClaims{}, nil
+}
+
+func verify(jwToken models.JWT, f []byte) (*jwt.Token, error) {
+	token, err := jwt.ParseWithClaims(jwToken.Authorization, &models.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return f, nil
+	})
+	return token, err
 }
