@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/thisismyaim/utils/model"
+	"github.com/thisismyaim/utils/models"
 	"github.com/thisismyaim/utils/mydb"
 	"net/http"
 	"os"
