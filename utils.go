@@ -92,7 +92,7 @@ func ValidateAuth() gin.HandlerFunc {
 			return
 		}
 
-		user, err := getToken(jwtToken)
+		user, err := verifyAuthToken(jwtToken)
 
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -106,8 +106,13 @@ func ValidateAuth() gin.HandlerFunc {
 	}
 }
 
-func checkIfRefreshTokenNotExpired() (*models.JWT, error) {
+func IssueTokenPair() (*models.JWT, error) {
+	if cookie == "" {
+		return nil, errors.New("device id not found")
+	}
+
 	var jwToken models.JWT
+	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
 	row := mydb.DB.QueryRow("SELECT refresh_token, device_id from oauth where device_id=?", cookie)
 
 	err := row.Scan(&jwToken.Authorization, &cookie)
@@ -117,10 +122,20 @@ func checkIfRefreshTokenNotExpired() (*models.JWT, error) {
 		return nil, err
 	}
 
-	return &jwToken, nil
+	token, err := verify(jwToken, f)
+
+	if err != nil {
+		return nil, nil
+	}
+
+	if token.Valid {
+		return &jwToken, nil
+	}
+	return nil, err
 }
 
-func getToken(jwToken models.JWT) (*models.UserClaims, error) {
+// verifyAuthToken will verify the passed token
+func verifyAuthToken(jwToken models.JWT) (*models.UserClaims, error) {
 	if cookie == "" {
 		return nil, errors.New("cookie expired or not exist")
 	}
@@ -129,21 +144,6 @@ func getToken(jwToken models.JWT) (*models.UserClaims, error) {
 
 	token, err := verify(jwToken, f)
 	if err != nil {
-		refreshToken, err := checkIfRefreshTokenNotExpired()
-		if err != nil {
-			return nil, err
-		}
-
-		r, refreshTokenErr := verify(*refreshToken, f)
-
-		if refreshTokenErr != nil {
-			return nil, refreshTokenErr
-		}
-
-		if r.Valid {
-			return r.Claims.(*models.UserClaims), nil
-		}
-
 		return &models.UserClaims{}, err
 	}
 

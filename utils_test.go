@@ -15,7 +15,7 @@ func init()  {
 func TestValidateAuth(t *testing.T) {
 	jwToken := models.JWT{Authorization: os.Getenv("TEST_ACCESS_TOKEN")}
 
-	u, err := getToken(jwToken)
+	u, err := verifyAuthToken(jwToken)
 
 	if err != nil {
 		t.Error(err)
