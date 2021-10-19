@@ -26,8 +26,8 @@ func init()  {
 // CreateOrUpdateToken will issue new bearer token
 func CreateOrUpdateToken(user *models.User) (map[string]string, *jwt.Token, error) {
 	var f, err = os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
-	expireAt := time.Now().Add(20 * time.Second)
-	refreshExpireAt := time.Now().Add(3 * time.Minute)
+	expireAt := time.Now().Add(20 * time.Minute)
+	refreshExpireAt := time.Now().Add(60 * time.Minute)
 
 	if err != nil {
 		return map[string]string{}, nil, err
@@ -65,6 +65,34 @@ func CreateOrUpdateToken(user *models.User) (map[string]string, *jwt.Token, erro
 		"auth_token":   signedString,
 		"refresh_token": refreshSignedString,
 	}, token, nil
+}
+
+func IssueTokenPair() (*models.JWT, error) {
+	if cookie == "" {
+		return nil, errors.New("device id not found")
+	}
+
+	var jwToken models.JWT
+	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
+	row := mydb.DB.QueryRow("SELECT refresh_token, device_id from oauth where device_id=?", cookie)
+
+	err := row.Scan(&jwToken.Authorization, &cookie)
+
+	if err != nil {
+		Logger().Error(err.Error())
+		return nil, err
+	}
+
+	token, err := verify(jwToken, f)
+
+	if err != nil {
+		return nil, nil
+	}
+
+	if token.Valid {
+		return &jwToken, nil
+	}
+	return nil, err
 }
 
 // ValidateAuth ValidateToken for auth header request
@@ -106,38 +134,10 @@ func ValidateAuth() gin.HandlerFunc {
 	}
 }
 
-func IssueTokenPair() (*models.JWT, error) {
-	if cookie == "" {
-		return nil, errors.New("device id not found")
-	}
-
-	var jwToken models.JWT
-	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
-	row := mydb.DB.QueryRow("SELECT refresh_token, device_id from oauth where device_id=?", cookie)
-
-	err := row.Scan(&jwToken.Authorization, &cookie)
-
-	if err != nil {
-		Logger().Error(err.Error())
-		return nil, err
-	}
-
-	token, err := verify(jwToken, f)
-
-	if err != nil {
-		return nil, nil
-	}
-
-	if token.Valid {
-		return &jwToken, nil
-	}
-	return nil, err
-}
-
 // verifyAuthToken will verify the passed token
 func verifyAuthToken(jwToken models.JWT) (*models.UserClaims, error) {
 	if cookie == "" {
-		return nil, errors.New("cookie expired or not exist")
+		return nil, errors.New("device expired or not exist")
 	}
 
  	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
