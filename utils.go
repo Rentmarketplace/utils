@@ -15,7 +15,7 @@ var (
 	cookie string
 )
 
-func init()  {
+func init() {
 	_, err := mydb.Connect()
 
 	if err != nil {
@@ -34,7 +34,7 @@ func CreateOrUpdateToken(user *models.User) (map[string]string, *jwt.Token, erro
 	}
 
 	claim := &models.UserClaims{
-		User: *user,
+		User:    *user,
 		Refresh: false,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: expireAt.Unix(),
@@ -48,7 +48,7 @@ func CreateOrUpdateToken(user *models.User) (map[string]string, *jwt.Token, erro
 	}
 
 	refreshClaim := &models.UserClaims{
-		User: *user,
+		User:    *user,
 		Refresh: true,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: refreshExpireAt.Unix(),
@@ -62,7 +62,7 @@ func CreateOrUpdateToken(user *models.User) (map[string]string, *jwt.Token, erro
 	}
 
 	return map[string]string{
-		"auth_token":   signedString,
+		"auth_token":    signedString,
 		"refresh_token": refreshSignedString,
 	}, token, nil
 }
@@ -120,6 +120,16 @@ func ValidateAuth() gin.HandlerFunc {
 			return
 		}
 
+		_, err = mydb.DB.Query("select * from oauth where device_id = ?", cookie)
+
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, models.Error{
+				Message: "Unauthorized",
+				Code:    401,
+			})
+			return
+		}
+
 		user, err := verifyAuthToken(jwtToken)
 
 		if err != nil {
@@ -140,13 +150,7 @@ func verifyAuthToken(jwToken models.JWT) (*models.UserClaims, error) {
 		return nil, errors.New("device expired or not exist")
 	}
 
- 	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
-
-	 _, err := mydb.DB.Query("select * from oauth where device_id = ?", cookie)
-
-	 if err != nil {
-		 return &models.UserClaims{}, err
-	 }
+	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
 
 	token, err := verify(jwToken, f)
 	if err != nil {
