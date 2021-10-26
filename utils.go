@@ -99,6 +99,7 @@ func IssueTokenPair() (*models.JWT, error) {
 func ValidateAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var jwtToken models.JWT
+		var token string
 		deviceCookie, err := c.Cookie("device")
 
 		if err != nil {
@@ -120,13 +121,13 @@ func ValidateAuth() gin.HandlerFunc {
 			return
 		}
 
-		row := mydb.DB.QueryRow("select * from oauth where device_id = ?", cookie)
+		row := mydb.DB.QueryRow("select auth_token from oauth where device_id = ? and auth_token", cookie, c.GetHeader("Authorization"))
 
-		err = row.Scan(&models.User{})
+		err = row.Scan(&token)
 
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, models.Error{
-				Message: "Unauthorized",
+				Message: "Unauthorized, No Token",
 				Code:    401,
 			})
 			return
