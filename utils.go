@@ -70,7 +70,10 @@ func CreateOrUpdateToken(user *models.User) (map[string]string, *jwt.Token, erro
 
 func IssueTokenPair(c *gin.Context) (*models.JWT, error) {
 	var jwToken models.JWT
-	if cookie == "" {
+
+	cookie, err := c.Cookie("device")
+
+	if err != nil {
 		return nil, errors.New("device id not found")
 	}
 
@@ -81,7 +84,7 @@ func IssueTokenPair(c *gin.Context) (*models.JWT, error) {
 	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
 	row := mydb.DB.QueryRow("SELECT refresh_token, device_id from oauth where device_id = ? and auth_token = ?", cookie, c.GetHeader("Authorization"))
 
-	err := row.Scan(&jwToken.Authorization, &cookie)
+	err = row.Scan(&jwToken.Authorization, &cookie)
 
 	if err != nil {
 		Logger().Error(err.Error())
@@ -97,6 +100,7 @@ func IssueTokenPair(c *gin.Context) (*models.JWT, error) {
 	if token.Valid {
 		return &jwToken, nil
 	}
+	
 	return nil, err
 }
 
