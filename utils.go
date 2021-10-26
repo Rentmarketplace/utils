@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/thisismyaim/utils/models"
@@ -123,8 +122,8 @@ func ValidateAuth() gin.HandlerFunc {
 
 		row := mydb.DB.QueryRow("select * from oauth where device_id = ?", cookie)
 
-		fmt.Println(row.Err().Error())
-		os.Exit(0)
+		err = row.Scan(&models.User{})
+
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, models.Error{
 				Message: "Unauthorized",
