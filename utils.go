@@ -122,7 +122,7 @@ func ValidateAuth() gin.HandlerFunc {
 			return
 		}
 
-		row := mydb.DB.QueryRow("select auth_token from oauth where device_id = ? and auth_token", cookie, c.GetHeader("Authorization"))
+		row := mydb.DB.QueryRow("select auth_token from oauth where device_id = ? and auth_token = ?", cookie, c.GetHeader("Authorization"))
 
 		err = row.Scan(&token)
 
