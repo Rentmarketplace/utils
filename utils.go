@@ -123,7 +123,7 @@ func ValidateAuth() gin.HandlerFunc {
 
 		row := mydb.DB.QueryRow("select * from oauth where device_id = ?", cookie)
 
-		fmt.Println(row)
+		fmt.Println(row.Err().Error())
 		os.Exit(0)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, models.Error{
