@@ -26,8 +26,8 @@ func init()  {
 // CreateOrUpdateToken will issue new bearer token
 func CreateOrUpdateToken(user *models.User) (map[string]string, *jwt.Token, error) {
 	var f, err = os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
-	expireAt := time.Now().Add(20 * time.Minute)
-	refreshExpireAt := time.Now().Add(60 * time.Minute)
+	expireAt := time.Now().Add(30 * time.Second)
+	refreshExpireAt := time.Now().Add(120 * time.Second)
 
 	if err != nil {
 		return map[string]string{}, nil, err
