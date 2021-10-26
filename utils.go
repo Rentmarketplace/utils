@@ -142,6 +142,12 @@ func verifyAuthToken(jwToken models.JWT) (*models.UserClaims, error) {
 
  	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
 
+	 _, err := mydb.DB.Query("select * from oauth where device_id = ?", cookie)
+
+	 if err != nil {
+		 return &models.UserClaims{}, err
+	 }
+
 	token, err := verify(jwToken, f)
 	if err != nil {
 		return &models.UserClaims{}, err
