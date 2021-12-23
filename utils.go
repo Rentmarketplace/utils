@@ -100,7 +100,7 @@ func IssueTokenPair(c *gin.Context) (*models.JWT, error) {
 	if token.Valid {
 		return &jwToken, nil
 	}
-	
+
 	return nil, err
 }
 
