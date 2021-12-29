@@ -20,6 +20,7 @@ func Logger() *logrus.Logger {
 		logrus.ErrorLevel: os.Getenv("LOG_PATH") + "Error-" + time.Now().Format("01-02-2006") + ".log",
 		logrus.WarnLevel:  os.Getenv("LOG_PATH") + "Warning-" + time.Now().Format("01-02-2006") + ".log",
 		logrus.DebugLevel: os.Getenv("LOG_PATH") + "Debug-" + time.Now().Format("01-02-2006") + ".log",
+		logrus.TraceLevel: os.Getenv("LOG_PATH") + time.Now().Format("01-02-2006") + ".test.log",
 	}
 
 	Log = logrus.New()
