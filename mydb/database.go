@@ -1,26 +1,26 @@
 package mydb
 
 import (
-	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql" // nolint
+	"github.com/jmoiron/sqlx"
 	"os"
 	"time"
 )
 
 // DB Database Instance
 var (
-	DB *sql.DB
+	DB *sqlx.DB
 )
 
-func Connect() (*sql.DB, error) {
+func Connect() (*sqlx.DB, error) {
 	dbHostname := os.Getenv("DB_HOST")
 	dbUsername := os.Getenv("DB_USERNAME")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbDatabase := os.Getenv("DB_DATABASE")
 	dbString := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUsername, dbPassword, dbHostname, dbDatabase)
 
-	db, err := sql.Open("mysql", dbString)
+	db, err := sqlx.Open("mysql", dbString)
 
 	if err != nil {
 		return nil, err
