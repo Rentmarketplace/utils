@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/thisismyaim/utils/models"
-	"github.com/thisismyaim/utils/mydb"
+	rdb "github.com/thisismyaim/utils/mydb"
 	"net/http"
 	"os"
 	"time"
@@ -14,14 +14,19 @@ import (
 
 var (
 	cookie string
+	mydb   *rdb.DB
 )
 
 func init() {
-	_, err := mydb.Connect()
+	database := rdb.DB{}
+
+	db, err := database.New()
 
 	if err != nil {
-		Logger().Error(err.Error())
+		Logger().Error(err)
 	}
+
+	mydb = db
 }
 
 // CreateOrUpdateToken will issue new bearer token

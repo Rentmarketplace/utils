@@ -8,21 +8,49 @@ import (
 	"time"
 )
 
-// DB Database Instance
-var (
-	DB *sqlx.DB
+// Stmt DB Database Instance
+type (
+	Stmt      *sqlx.Stmt
+	Row       *sqlx.Row
+	Rows      *sqlx.Rows
+	Conn      *sqlx.Conn
+	NamedStmt *sqlx.NamedStmt
+	TX        *sqlx.Tx
 )
 
-func Connect() (*sqlx.DB, error) {
+type DB struct {
+	DB *sqlx.DB
+}
+
+type IDB interface {
+	Connect() *sqlx.DB
+	New() *DB
+}
+
+func (d *DB) New() (*sqlx.DB, error) {
+	db, err := d.Connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func (d *DB) Connect() (*sqlx.DB, error) {
 	dbHostname := os.Getenv("DB_HOST")
 	dbUsername := os.Getenv("DB_USERNAME")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbDatabase := os.Getenv("DB_DATABASE")
 	dbString := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUsername, dbPassword, dbHostname, dbDatabase)
 
-	db, err := sqlx.Open("mysql", dbString)
+	db, err := sqlx.Connect("mysql", dbString)
 
 	if err != nil {
+		err := db.Close()
+		if err != nil {
+			return nil, err
+		}
 		return nil, err
 	}
 
@@ -33,10 +61,8 @@ func Connect() (*sqlx.DB, error) {
 	err = db.Ping()
 
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	DB = db
-
-	return DB, nil
+	return db, nil
 }
