@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/thisismyaim/utils/utils/models"
+	"github.com/thisismyaim/utils/models"
 	"os"
 	"testing"
 )
