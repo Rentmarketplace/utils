@@ -1,12 +1,12 @@
-package utils
+package utils_v1_0
 
 import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/thisismyaim/utils/models"
-	rdb "github.com/thisismyaim/utils/mydb"
+	"github.com/thisismyaim/utils/utils@v1.0/models"
+	rdb "github.com/thisismyaim/utils/utils@v1.0/mydb"
 	"net/http"
 	"os"
 	"time"

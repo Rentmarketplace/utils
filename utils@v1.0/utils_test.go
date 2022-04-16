@@ -1,14 +1,14 @@
-package utils
+package utils_v1_0
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/thisismyaim/utils/models"
+	"github.com/thisismyaim/utils/utils@v1.0/models"
 	"os"
 	"testing"
 )
 
-func init()  {
+func init() {
 	gin.SetMode(gin.TestMode)
 }
 

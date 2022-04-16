@@ -1,4 +1,4 @@
-package utils
+package utils_v1_0
 
 import (
 	"github.com/rifflock/lfshook"
