@@ -8,36 +8,7 @@ import (
 	"time"
 )
 
-// Stmt DB Database Instance
-type (
-	Stmt      *sqlx.Stmt
-	Row       *sqlx.Row
-	Rows      *sqlx.Rows
-	Conn      *sqlx.Conn
-	NamedStmt *sqlx.NamedStmt
-	TX        *sqlx.Tx
-)
-
-type DB struct {
-	DB *sqlx.DB
-}
-
-type IDB interface {
-	Connect() *sqlx.DB
-	New() *DB
-}
-
-func (d *DB) New() (*sqlx.DB, error) {
-	db, err := d.Connect()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
-}
-
-func (d *DB) Connect() (*sqlx.DB, error) {
+func Connect() (*sqlx.DB, error) {
 	dbHostname := os.Getenv("DB_HOST")
 	dbUsername := os.Getenv("DB_USERNAME")
 	dbPassword := os.Getenv("DB_PASSWORD")
@@ -54,9 +25,7 @@ func (d *DB) Connect() (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	db.SetConnMaxLifetime(time.Minute * 2)
-	db.SetMaxIdleConns(5)
-	db.SetMaxOpenConns(10)
+	db.SetConnMaxLifetime(time.Minute * 1)
 
 	err = db.Ping()
 

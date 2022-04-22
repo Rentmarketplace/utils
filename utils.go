@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/jmoiron/sqlx"
 	"github.com/thisismyaim/utils/models"
 	rdb "github.com/thisismyaim/utils/mydb"
 	"net/http"
@@ -14,19 +15,16 @@ import (
 
 var (
 	cookie string
-	mydb   *rdb.DB
 )
 
-func init() {
-	database := rdb.DB{}
-
-	db, err := database.New()
+func Database() *sqlx.DB {
+	mdb, err := rdb.Connect()
 
 	if err != nil {
-		Logger().Error(err)
+		Logger().Errorln(err)
 	}
 
-	mydb = db
+	return mdb
 }
 
 // CreateOrUpdateToken will issue new bearer token
@@ -87,7 +85,7 @@ func IssueTokenPair(c *gin.Context) (*models.JWT, error) {
 	}
 
 	f, _ := os.ReadFile(os.Getenv("CERTIFICATE_FILE"))
-	row := mydb.DB.QueryRow("SELECT refresh_token, device_id from oauth where device_id = ? and auth_token = ?", cookie, c.GetHeader("Authorization"))
+	row := Database().QueryRow("SELECT refresh_token, device_id from oauth where device_id = ? and auth_token = ?", cookie, c.GetHeader("Authorization"))
 
 	err = row.Scan(&jwToken.Authorization, &cookie)
 
@@ -135,7 +133,7 @@ func ValidateAuth() gin.HandlerFunc {
 			return
 		}
 
-		row := mydb.DB.QueryRow("select auth_token from oauth where device_id = ? and auth_token = ?", cookie, c.GetHeader("Authorization"))
+		row := Database().QueryRow("select auth_token from oauth where device_id = ? and auth_token = ?", cookie, c.GetHeader("Authorization"))
 
 		err = row.Scan(&token)
 
