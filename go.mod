@@ -1,4 +1,4 @@
-module github.com/thisismyaim/utils
+module github.com/Rentmarketplace/utils
 
 go 1.18
 
