@@ -1,4 +1,4 @@
-module github.com/Rentmarketplace/utils
+module github.com/rentmarketplace/utils
 
 go 1.18
 
