@@ -2,8 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"github.com/Rentmarketplace/utils/models"
 	"github.com/gin-gonic/gin"
-	"github.com/thisismyaim/utils/models"
 	"os"
 	"testing"
 )

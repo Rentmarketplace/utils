@@ -3,11 +3,11 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"github.com/Rentmarketplace/utils/models"
+	rdb "github.com/Rentmarketplace/utils/mydb"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/jmoiron/sqlx"
-	"github.com/thisismyaim/utils/models"
-	rdb "github.com/thisismyaim/utils/mydb"
 	"net/http"
 	"os"
 	"time"
