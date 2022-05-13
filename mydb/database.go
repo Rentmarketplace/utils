@@ -4,7 +4,6 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql" // nolint
 	"github.com/jmoiron/sqlx"
-	"github.com/rentmarketplace/utils"
 	"os"
 	"time"
 )
